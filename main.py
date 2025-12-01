@@ -228,22 +228,33 @@ if __name__ == "__main__":
     #     print(f"An error occurred: {e}")
 
 # main.py
+"""
+Pastikan file ini berada di root repo (dor/main.py).
+Fungsi run_task harus mengembalikan object yang JSON-serializable.
+Sesuaikan logika di sini dengan kode CLI Anda.
+"""
+
 def run_task(params: dict):
     """
-    Contoh wrapper untuk logika CLI anda.
-    Ubah isi fungsi ini sesuai kode di main.py asli.
-    Pastikan fungsi ini tidak melakukan operasi blocking panjang.
+    Contoh implementasi sederhana.
+    Ganti isi fungsi ini dengan logika asli Anda.
+    Jangan jalankan kode berat di level modul — taruh kode CLI di bawah if __name__ == "__main__".
     """
-    # contoh: baca argumen
-    # lakukan pekerjaan utama
-    result = {
-        "message": "task executed",
-        "input": params
-    }
-    return result
+    # contoh sederhana
+    try:
+        name = params.get("name", "anon")
+        action = params.get("action", "none")
+        # implementasi nyata Anda di sini...
+        return {
+            "message": f"Hello {name}, action {action} diterima",
+            "input": params
+        }
+    except Exception as e:
+        # tangani error agar server tidak crash; kembalikan serializable
+        return {"error": str(e)}
 
 if __name__ == "__main__":
-    # CLI behaviour (jika Anda ingin tetap bisa jalan lewat terminal)
+    # CLI behaviour saat dijalankan dari terminal (tidak dieksekusi saat di-import oleh Flask)
     import sys, json
     args = sys.argv[1:]
-    print(run_task({"cli_args": args}))
+    print(json.dumps(run_task({"cli_args": args}), indent=2))
