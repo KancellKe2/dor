@@ -226,3 +226,24 @@ if __name__ == "__main__":
         print("\nExiting the application.")
     # except Exception as e:
     #     print(f"An error occurred: {e}")
+
+# main.py
+def run_task(params: dict):
+    """
+    Contoh wrapper untuk logika CLI anda.
+    Ubah isi fungsi ini sesuai kode di main.py asli.
+    Pastikan fungsi ini tidak melakukan operasi blocking panjang.
+    """
+    # contoh: baca argumen
+    # lakukan pekerjaan utama
+    result = {
+        "message": "task executed",
+        "input": params
+    }
+    return result
+
+if __name__ == "__main__":
+    # CLI behaviour (jika Anda ingin tetap bisa jalan lewat terminal)
+    import sys, json
+    args = sys.argv[1:]
+    print(run_task({"cli_args": args}))
