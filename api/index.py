@@ -1,12 +1,20 @@
 # api/index.py
 from flask import Flask, request, jsonify
-import os
-import traceback
+import os, traceback
 
-# Jika Anda mengekspor fungsi dari main.py, import di sini.
-# from main import run_task
+# enable CORS
+from flask_cors import CORS
+
+# import run_task dari main.py
+try:
+    from main import run_task
+except Exception as e:
+    # fallback: import gagal — beri pesan yang jelas di logs
+    def run_task(params):
+        return {"status": "error", "note": f"Import main.run_task gagal: {str(e)}"}
 
 app = Flask(__name__)
+CORS(app)  # izinkan cross-origin (preflight OPTIONS sudah ditangani)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -22,20 +30,21 @@ def home():
 @app.route("/run", methods=["POST"])
 def run_action():
     try:
-        data = request.json or {}
-        # contoh: panggil fungsi yang anda expose dari main.py
-        # result = run_task(data)
-        # sementara ini kita kembalikan contoh respons
-        result = {
-            "status": "ok",
-            "note": "Ganti bagian ini untuk memanggil fungsi dari main.py",
-            "received": data
-        }
-        return jsonify(result)
+        data = request.get_json(force=False, silent=True) or {}
+        # panggil fungsi utama yang diekspor dari main.py
+        result = run_task(data)
+        # pastikan JSON-serializable — jika bukan, bungkus ke str
+        try:
+            return jsonify({"status": "ok", "result": result})
+        except TypeError:
+            return jsonify({"status": "ok", "result": str(result)})
     except Exception as e:
-        return jsonify({"status": "error", "error": str(e), "trace": traceback.format_exc()}), 500
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "trace": traceback.format_exc()
+        }), 500
 
-# Untuk Vercel: expose Flask `app` variable
-# Vercel's Python runtime will use `app` as WSGI/ASGI entrypoint.
 if __name__ == "__main__":
-    app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
